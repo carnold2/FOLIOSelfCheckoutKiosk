@@ -1,0 +1,21 @@
+{
+  "name": "kiosk",
+  "version": "1.0.0",
+  "description": "self checkout kiosk for FOLIO instance",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "self",
+    "checkout",
+    "FOLIO"
+  ],
+  "author": "Cori Lynn Arnold",
+  "license": "MIT",
+  "dependencies": {
+    "body-parser": "^1.20.2",
+    "cors": "^2.8.5",
+    "express": "^4.18.2"
+  }
+}
