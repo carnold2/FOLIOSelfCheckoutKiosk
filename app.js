@@ -51,6 +51,7 @@ app.post('/api/patron/validate', (req, res) => {
 			})
 			.catch(err => {
 				console.log(err)
+				res.sendFile(path.join(__dirname,'error.html'));
 			});
 		}
 	} else {
