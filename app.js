@@ -10,7 +10,21 @@ const app = express();
 const servicepoint = process.env.KIOSKSERVICEPOINT || '';
 const foliohost = process.env.KIOSKFOLIOHOST || '';
 const tenant = process.env.KIOSKTENANT || '';
-const token = process.env.KIOSKTOKEN || '';
+const username = process.env.KIOSKUSERNAME || '';
+const password = process.env.KIOSKPASSWORD || '';
+
+// Keycloak auth values — defaults derived from KIOSKFOLIOHOST and KIOSKTENANT
+// e.g. if KIOSKFOLIOHOST=api-mylib.folio.ebsco.com and KIOSKTENANT=fs00001234:
+//   keycloakhost → keycloak-mylib.folio.ebsco.com
+//   clientId     → fs00001234-application
+//   redirectUri  → https://mylib.folio.ebsco.com/oidc-landing?tenant=fs00001234&client_id=fs00001234-application
+const keycloakhost = process.env.KIOSKKEYCLOAKHOST || foliohost.replace(/^api-/, 'keycloak-');
+const clientId = process.env.KIOSKCLIENTID || `${tenant}-application`;
+const folioUiHost = process.env.KIOSKFOLIOUIHOST || foliohost.replace(/^api-/, '');
+const redirectUri = process.env.KIOSKREDIRECTURI || `https://${folioUiHost}/oidc-landing?tenant=${tenant}&client_id=${clientId}`;
+
+// Single instance so the authentication token is cached across requests
+const apiController = new ApiController();
 
 let barcodes = [];
 
@@ -38,7 +52,7 @@ app.post('/api/patron/validate', (req, res) => {
 			console.log(`Unable to checkout for userbarcode: ${userbarcode} ; itembarcode: ${itembarcode}\n`);
 			res.sendFile(path.join(__dirname,'error.html'));
 		} else {
-			new ApiController().postBarcode(foliohost, servicepoint, tenant, token, userbarcode, itembarcode)
+			apiController.postBarcode(foliohost, servicepoint, tenant, keycloakhost, clientId, redirectUri, username, password, userbarcode, itembarcode)
 			.then(data => {
 				let jsondata = JSON.parse(data);
 				if(jsondata.hasOwnProperty("errors")){
@@ -58,15 +72,14 @@ app.post('/api/patron/validate', (req, res) => {
 		console.log(`Unable to checkout for userbarcode: ${userbarcode} ; itembarcode: ${itembarcode}\n`);
 		res.sendFile(path.join(__dirname,'error.html'));
 	}
-	
+
 });
 
 const port = process.env.KIOSKPORT || 3000;
-if(token.length == 0){
-	console.log("Env KIOSKTOKEN not set\n");
+if(username.length == 0 || password.length == 0){
+	console.log("Env KIOSKUSERNAME and KIOSKPASSWORD must be set\n");
 	process.exit();
 }
-app.listen(port,hostname, () => {
+app.listen(port, hostname, () => {
 	console.log(`API server listening on port ${port}`);
 });
- 
