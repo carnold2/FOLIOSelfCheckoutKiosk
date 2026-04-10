@@ -108,7 +108,7 @@ class ApiController {
 
         if (credRes.statusCode !== 302) throw new Error('Login failed: invalid credentials or Keycloak rejected the request');
 
-        const codeMatch = credRes.headers.location?.match(/[?&]code=([^&]+)/);
+        const codeMatch = credRes.headers.location && credRes.headers.location.match(/[?&]code=([^&]+)/);
         if (!codeMatch) throw new Error(`No authorization code in redirect: ${credRes.headers.location}`);
         const code = decodeURIComponent(codeMatch[1]);
 
