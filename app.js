@@ -39,6 +39,10 @@ app.get('/', (req, res) => {
 app.use(bodyParser.urlencoded({ extended: false}));
 app.use(bodyParser.json());
 
+app.get('/api/patron/validate', (req, res) => {
+	res.redirect('/');
+});
+
 app.post('/api/patron/validate', (req, res) => {
 	const body = req.body;
 	//validate the parameters
